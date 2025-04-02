@@ -1,117 +1,99 @@
+# Coach-Intelligence-System Prototype
 
-# Coach-Intelligence-System
+A multi-agent AI system designed to empower football coaches with strategic planning, real-time data analysis, and visualization.
 
-## Overview
+## Features
 
-![img](imgs/AI%20Taweek%20Competition.png)
+- **Strategy Planning**: Generate and adjust game strategies based on real-time data
+- **Data Retrieval**: Fetch live match data, coaching documents, and external information
+- **Data Analysis**: Process match events and recommend tactical adjustments
+- **Visualization**: Display strategies and analytics with clear visuals
 
+## Installation
 
-This project aims to build an agent-based system capable of:
-- Planning and visualizing strategies (e.g., formations).
-- Retrieving and analyzing data in real-time from internal and external sources.
-- Engaging in voice-based conversation and interaction.
-- Offering in-game support through data retrieval, analysis, and strategic suggestions.
+1. **Clone the repository**:
 
-## Core Components
-
-### 1. Planning
-
-- **Purpose**: Generate strategic plans (e.g., formations like 4-3-3) based on input from other agents or data sources.  
-- **Key Tasks**:
-  - Create a new plan if the existing plan is not performing well.
-  - Collaborate with other agents to ensure up-to-date strategies.
-  - Provide visual representations of the plan for clarity.
-
-### 2. RAG (Retrieval-Augmented Generation)
-
-- **Purpose**: Search relevant documents, databases, or knowledge bases to gather information that enriches the system’s responses and decisions.  
-- **Key Tasks**:
-  - Retrieve relevant data for conversation or decision-making.
-  - Integrate search results to guide planning and strategy.
-
-### 3. Search Tool
-
-- **Purpose**: Scrape and query the web or external sources for real-time data.  
-- **Key Tasks**:
-  - Collect updated information about matches or game events.
-  - Provide external context to refine plans and strategies.
-
-### 4. In Game
-
-- **Purpose**: Provide real-time in-game data for both your team and the opposing team.  
-- **Key Tasks**:
-  - Connect to an external or specialized game database to fetch current match data.
-  - At specific intervals (e.g., every minute or a defined time range), update the plan or strategy based on the latest game events.
-  - Generate concise reports with suggestions or adjustments to the current strategy.
-
-#### Tool 1 (Automated)
-- Fetch data from the real-time api-football (both the plan and the ongoing match events) and store in the DB.
-
-#### Tool 2 (Analysis)
-- Analyze match events and output actionable insights (e.g., recommended tactical changes).
-
-### 5. Voice
-
-- **Purpose**: Enable voice-based interaction with the system.  
-- **Key Tasks**:
-  - Convert speech to text (STT) for input to the system.
-  - Convert text responses from the system to speech (TTS) for user feedback.
-
-### 6. Visualizer
-
-- **Purpose**: Present data and plans in an easily understandable format.  
-- **Key Tasks**:
-  - Take inputs (e.g., formations or strategies) from other agents.
-  - Generate visual representations (e.g., formation layouts, dashboards).
-
-## How It All Works Together
-
-1. **Data Collection**  
-   - The **Search Tool** and **RAG** component gather data from both external (web scraping, knowledge bases) and internal (databases, documents) sources.
-2. **Planning & Analysis**  
-   - The **Planning** agent uses this data to propose or update strategies (e.g., formation changes).
-   - **Tool 1** (automated) retrieves real-time match data, while **Tool 2** analyzes it to produce suggestions.
-3. **Visualization & Voice Interaction**  
-   - The **Visualizer** presents updated strategies in an accessible format.
-   - The **Voice** component allows users to receive and provide information through speech, enabling hands-free interaction.
-4. **Iteration & Feedback**  
-   - In-game performance data feeds back into the system, prompting updated strategies as the match progresses.
-   - The system can pivot to new plans if the current approach underperforms.
-
-## Potential Use Cases
-
-1. **Live Match Coaching**  
-   - Coaches receive minute-by-minute suggestions based on real-time data.
-   - Voice integration enables quick hands-free commands and updates.
-2. **Automated Strategy Updates**  
-   - The Planning agent automatically adapts formations if performance metrics fall below certain thresholds.
-3. **Post-Match Analysis**  
-   - The system reviews match events to suggest improvements for future matches.
-
-## Installation & Setup
-
-1. **Clone the Repository**  
    ```bash
-   git clone https://github.com/YourRepo/agent-features.git
+   git clone https://github.com/yourusername/coach-intelligence-system.git
+   cd coach-intelligence-system
    ```
-2. **Install Dependencies**  
-   - Ensure you have Python (or the relevant language environment) set up.
-   - Install required packages (e.g., via `pip install -r requirements.txt`).
-3. **Configure Data Sources**  
-   - Set up your database or connect to the external services for match data.
-   - Provide any API keys or credentials needed for the Search Tool or RAG.
 
+2. **Install dependencies**:
 
-## Contributing
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-1. **Fork the Repository**  
-2. **Create a Feature Branch**  
-3. **Commit Your Changes**  
-4. **Open a Pull Request**  
+3. **Environment Setup**:
+   Create a `.env` file in the root directory with the following variables:
+   ```
+   GEMINI_API_KEY=your_gemini_api_key
+   SERPAPI_API_KEY=your_serpapi_key
+   ```
 
-Please include clear commit messages and ensure your code follows the project’s coding standards.
+## Usage
+
+Run the application using:
+
+```bash
+python run.py
+```
+
+This will launch a Gradio interface where you can enter coaching commands like:
+
+- "Suggest a defensive formation"
+- "Analyze Manchester United's last match"
+- "Show me a 4-3-3 formation"
+- "What tactics should I use against a team that presses high?"
+
+## Development Priority
+
+Below is the prioritized order for developing the features of the Coach-Intelligence-System, ensuring a logical sequence based on dependencies and system requirements:
+
+| **Order** | **Feature**          | **Description**                                       | **Dependencies**               |
+| --------- | -------------------- | ----------------------------------------------------- | ------------------------------ |
+| 1         | Coordinator Agent    | Central hub for user interaction and task delegation. | None                           |
+| 2         | Data Retrieval Agent | Gathers data from various sources.                    | Coordinator Agent              |
+| 3         | RAG Tool             | Retrieves internal coaching data.                     | Data Retrieval Agent           |
+| 4         | Search Tool          | Collects external data.                               | Data Retrieval Agent           |
+| 5         | Match Data Fetcher   | Retrieves real-time match data from api-football.     | Data Retrieval Agent           |
+| 6         | Analysis Agent       | Interprets data for actionable insights.              | Data Retrieval Agent           |
+| 7         | Match Data Analyzer  | Processes real-time match data for insights.          | Analysis Agent                 |
+| 8         | Planning Agent       | Designs and refines game strategies.                  | Coordinator Agent              |
+| 9         | Planning Tool        | Generates strategic recommendations.                  | Planning Agent                 |
+| 10        | Visualization Agent  | Renders data and strategies visually.                 | Planning Agent, Analysis Agent |
+| 11        | Visualization        | Presents strategies and analytics visually.           | Visualization Agent            |
+
+## System Architecture
+
+### Agents
+
+- **Coordinator Agent**: Manages user interaction and orchestrates other agents
+- **Data Retrieval Agent**: Gathers data from various sources
+- **Analysis Agent**: Interprets data for actionable insights
+- **Planning Agent**: Designs and refines game strategies
+- **Visualization Agent**: Renders data and strategies visually
+
+### Tools
+
+- **RAG Tool**: Retrieves internal coaching data
+- **Search Tool**: Collects external data
+- **Match Data Fetcher**: Retrieves real-time match data
+- **Match Data Analyzer**: Processes match data into insights
+- **Planning Tool**: Generates strategic recommendations
+- **Visualization Tool**: Creates visual representations
+
+## Example Workflow
+
+1. User enters a command: "Suggest a formation for a defensive approach"
+2. Coordinator Agent understands the request and delegates tasks
+3. Data Retrieval Agent gathers relevant information about defensive formations
+4. Planning Agent generates a formation recommendation (e.g., 5-3-2)
+5. Visualization Agent creates a visual diagram of the formation
+6. Coordinator Agent compiles all information and presents it to the user
 
 ## License
 
-GNU GENERAL PUBLIC LICENSE 
+GNU General Public License
 
+---

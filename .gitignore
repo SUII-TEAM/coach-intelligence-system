@@ -172,3 +172,14 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# IDE settings
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Project specific
+src/visualization/output/
+src/data/coaching_docs/
+*.log
