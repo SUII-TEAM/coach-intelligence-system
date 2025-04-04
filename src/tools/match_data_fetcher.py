@@ -1,7 +1,7 @@
 import os
 import json
 import requests
-from langchain.tools import Tool
+from llama_index.core.tools import FunctionTool
 from datetime import datetime
 
 
@@ -16,10 +16,10 @@ class MatchDataFetcher:
         # self.api_key = os.getenv("API_FOOTBALL_KEY")
 
         # Create the tool
-        self.tool = Tool.from_function(
-            func=self.fetch_match_data,
+        self.tool = FunctionTool.from_defaults(
             name=self.name,
-            description=self.description
+            description=self.description,
+            fn=self.fetch_match_data
         )
 
     def fetch_match_data(self, match_id=None, team_name=None):

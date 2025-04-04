@@ -1,8 +1,9 @@
 import os
 import gradio as gr
 from dotenv import load_dotenv
-from crewai import Crew
 import logging
+import google.generativeai as genai
+from typing import Dict, Any
 
 # Import agents
 from src.agents import (
@@ -30,33 +31,40 @@ def load_environment():
             f"Missing environment variables: {', '.join(missing_keys)}")
         logging.warning("Some functionality may be limited.")
 
+    # Configure Gemini API
+    gemini_api_key = os.getenv("GEMINI_API_KEY")
+    if gemini_api_key:
+        genai.configure(api_key=gemini_api_key)
+
 
 def initialize_agents(logger):
     """Initialize all agents for the system"""
     logger.info("Initializing agents...")
 
     try:
-        coordinator_agent = CoordinatorAgent().create()
+        # Create agent objects (not actual LlamaIndex agents yet)
+        coordinator = CoordinatorAgent()
         logger.info("Coordinator Agent initialized")
 
-        data_retrieval_agent = DataRetrievalAgent().create()
+        data_retrieval = DataRetrievalAgent()
         logger.info("Data Retrieval Agent initialized")
 
-        analysis_agent = AnalysisAgent().create()
+        analysis = AnalysisAgent()
         logger.info("Analysis Agent initialized")
 
-        planning_agent = PlanningAgent().create()
+        planning = PlanningAgent()
         logger.info("Planning Agent initialized")
 
-        visualization_agent = VisualizationAgent().create()
+        visualization = VisualizationAgent()
         logger.info("Visualization Agent initialized")
 
+        # Return agent objects in a dictionary
         agents = {
-            "coordinator": coordinator_agent,
-            "data_retrieval": data_retrieval_agent,
-            "analysis": analysis_agent,
-            "planning": planning_agent,
-            "visualization": visualization_agent
+            "coordinator": coordinator,
+            "data_retrieval": data_retrieval,
+            "analysis": analysis,
+            "planning": planning,
+            "visualization": visualization
         }
 
         logger.info("All agents initialized successfully")
@@ -67,32 +75,43 @@ def initialize_agents(logger):
         raise
 
 
-def create_crew(agents, logger):
-    """Create a CrewAI crew with the initialized agents"""
-    logger.info("Creating crew with agents...")
+def create_agent_system(agents, logger):
+    """Create an integrated multi-agent system"""
+    logger.info("Creating agent system...")
 
     try:
-        crew = Crew(
-            agents=[
-                agents["coordinator"],
-                agents["data_retrieval"],
-                agents["analysis"],
-                agents["planning"],
-                agents["visualization"]
-            ],
-            tasks=[],  # Tasks will be created by the coordinator agent
-            verbose=True
-        )
+        # Extract all tools from specialized agents
+        all_tools = []
+        for name, agent in agents.items():
+            if name != "coordinator":
+                agent_tools = agent.get_tools()
+                if agent_tools:
+                    # Debug: print tool information
+                    for tool in agent_tools:
+                        logger.info(f"Tool from {name}: {tool}")
+                        try:
+                            logger.info(f"Tool name: {tool.metadata.name}")
+                        except Exception as e:
+                            logger.error(
+                                f"Error accessing tool name: {str(e)}")
+                            logger.error(f"Tool type: {type(tool)}")
 
-        logger.info("Crew created successfully")
-        return crew
+                    all_tools.extend(agent_tools)
+                    logger.info(f"Added tools from {name} agent")
+
+        # Create coordinator agent with all tools
+        coordinator = agents["coordinator"]
+        multi_agent_system = coordinator.create(all_tools)
+
+        logger.info("Agent system created successfully")
+        return multi_agent_system
 
     except Exception as e:
-        logger.error(f"Error creating crew: {str(e)}")
+        logger.error(f"Error creating agent system: {str(e)}")
         raise
 
 
-def create_ui(crew, coordinator_agent, logger):
+def create_ui(agent_system, logger):
     """Create the Gradio UI for user interaction"""
     logger.info("Setting up user interface...")
 
@@ -104,13 +123,11 @@ def create_ui(crew, coordinator_agent, logger):
         logger.info(f"Processing command: {command}")
 
         try:
-            task = coordinator_agent.process_input(command)
-            logger.info(f"Created task: {task.description}")
+            # Process the command through the coordinator agent
+            response = agent_system.chat(command)
+            logger.info("Command processed successfully")
 
-            result = crew.kickoff(task=task)
-            logger.info("Task completed successfully")
-
-            return result
+            return str(response)
 
         except Exception as e:
             error_msg = f"Error processing command: {str(e)}"
@@ -149,8 +166,8 @@ def main():
     try:
         # Initialize the system
         agents = initialize_agents(logger)
-        crew = create_crew(agents, logger)
-        ui = create_ui(crew, agents["coordinator"], logger)
+        agent_system = create_agent_system(agents, logger)
+        ui = create_ui(agent_system, logger)
 
         # Launch the UI
         logger.info("Launching user interface")

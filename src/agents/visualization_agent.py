@@ -1,32 +1,23 @@
-from crewai import Agent
 from .base_agent import BaseAgent
-from ..visualization.visualization_tool import VisualizationTool
+from ..tools.planning_tool import PlanningTool
 
 
 class VisualizationAgent(BaseAgent):
     def __init__(self):
         super().__init__()
         self.role = "Visualization Agent"
-        self.goal = "Render data and strategies visually"
-        self.backstory = """
-        You are a specialist in visual communication who can transform complex
-        football data and strategies into clear, intuitive visual representations.
-        Your visualizations help coaches quickly understand match situations,
-        tactical options, and player performances through diagrams, charts, and
-        interactive displays.
+        self.goal = "Create visual representations of football concepts"
+        self.system_prompt = """
+        You are an expert in creating visual representations of football concepts.
+        Your specialty is generating clear diagrams of formations, tactical movements,
+        and statistical visualizations that help coaches understand complex information
+        at a glance. You can translate text descriptions into compelling visuals.
         """
 
-        # Initialize tools
-        self.visualization_tool = VisualizationTool()
+        # Initialize tools - using planning tool for now as it has visualization capabilities
+        self.planning_tool = PlanningTool()
 
-    def create(self):
-        return Agent(
-            role=self.role,
-            goal=self.goal,
-            backstory=self.backstory,
-            verbose=True,
-            llm=self.llm,
-            tools=[
-                self.visualization_tool.tool
-            ]
-        )
+        # Add tools to the agent's tool list
+        self.tools = [
+            self.planning_tool.tool
+        ]

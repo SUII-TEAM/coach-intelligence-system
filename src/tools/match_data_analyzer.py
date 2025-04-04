@@ -1,20 +1,20 @@
 import json
-from langchain.tools import Tool
+from llama_index.core.tools import FunctionTool
 
 
 class MatchDataAnalyzer:
     def __init__(self):
-        self.name = "match_data_analyzer"
+        self.name = "analyze_match_data"
         self.description = """
         Use this tool to analyze match data and provide tactical insights.
         This is useful for interpreting statistics, identifying patterns, and suggesting adjustments.
         """
 
         # Create the tool
-        self.tool = Tool.from_function(
-            func=self.analyze_match_data,
+        self.tool = FunctionTool.from_defaults(
             name=self.name,
-            description=self.description
+            description=self.description,
+            fn=self.analyze_match_data
         )
 
     def analyze_match_data(self, match_data):

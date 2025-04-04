@@ -74,10 +74,20 @@ Below is the prioritized order for developing the features of the Coach-Intellig
 - **Planning Agent**: Designs and refines game strategies
 - **Visualization Agent**: Renders data and strategies visually
 
+### Technology Stack
+
+The system is built using:
+
+- **LlamaIndex**: Core framework for creating and managing specialized AI agents
+- **Gemini Pro**: LLM powering agent reasoning and natural language understanding
+- **LangChain**: Integrated for specific tools like web search via SerpAPI
+- **Gradio**: User interface for interacting with the system
+- **Matplotlib/Plotly**: Data visualization libraries
+
 ### Tools
 
-- **RAG Tool**: Retrieves internal coaching data
-- **Search Tool**: Collects external data
+- **RAG Tool**: Retrieves internal coaching data using LlamaIndex's document index capabilities
+- **Search Tool**: Collects external data using LangChain's SerpAPI integration
 - **Match Data Fetcher**: Retrieves real-time match data
 - **Match Data Analyzer**: Processes match data into insights
 - **Planning Tool**: Generates strategic recommendations

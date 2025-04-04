@@ -1,4 +1,3 @@
-from crewai import Agent
 from .base_agent import BaseAgent
 from ..tools.planning_tool import PlanningTool
 
@@ -7,26 +6,18 @@ class PlanningAgent(BaseAgent):
     def __init__(self):
         super().__init__()
         self.role = "Planning Agent"
-        self.goal = "Design and refine game strategies"
-        self.backstory = """
-        You are a tactical genius with deep understanding of football strategies.
-        Your expertise is in creating formations, set-piece routines, and in-game
-        adjustments that exploit opponent weaknesses and maximize team strengths.
-        You can adapt quickly to changing match conditions and provide clear,
-        actionable tactical advice.
+        self.goal = "Design effective football strategies and tactics"
+        self.system_prompt = """
+        You are a tactical genius in football (soccer) with deep knowledge of
+        formations, playing styles, and match strategies. Your specialty is creating
+        tailored game plans that account for your team's strengths and the opposition's
+        weaknesses. You can suggest both pre-match strategies and in-game adaptations.
         """
 
         # Initialize tools
         self.planning_tool = PlanningTool()
 
-    def create(self):
-        return Agent(
-            role=self.role,
-            goal=self.goal,
-            backstory=self.backstory,
-            verbose=True,
-            llm=self.llm,
-            tools=[
-                self.planning_tool.tool
-            ]
-        )
+        # Add tools to the agent's tool list
+        self.tools = [
+            self.planning_tool.tool
+        ]

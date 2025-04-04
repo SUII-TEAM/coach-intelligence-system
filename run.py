@@ -23,7 +23,8 @@ def check_dependencies():
     """Check if all required dependencies are installed"""
     try:
         import gradio
-        import crewai
+        import llama_index
+        import langchain
         import matplotlib
         import dotenv
         return True

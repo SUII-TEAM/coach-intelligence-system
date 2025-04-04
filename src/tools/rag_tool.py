@@ -1,28 +1,30 @@
-from langchain.tools import Tool
-# We're using a simple text search for the prototype instead of vector embeddings
-# from llama_index import VectorStoreIndex, SimpleDirectoryReader
+from llama_index.core.tools import FunctionTool
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
+from llama_index.core.node_parser import SentenceSplitter
+from llama_index.llms.gemini import Gemini
+from llama_index.embeddings.gemini import GeminiEmbedding
 import os
 
 
 class RAGTool:
     def __init__(self):
-        self.name = "rag_tool"
+        self.name = "retrieve_coaching_data"
         self.description = """
         Use this tool to retrieve information from internal coaching documents.
         This is useful for accessing historical data, coaching manuals, and team policies.
         """
-        # Initialize mock data for the prototype
-        self._initialize_mock_data()
-        self.tool = Tool.from_function(
-            func=self.retrieve_data,
+        # Initialize LlamaIndex components
+        self._initialize_document_index()
+        self.tool = FunctionTool.from_defaults(
             name=self.name,
-            description=self.description
+            description=self.description,
+            fn=self.retrieve_data
         )
 
-    def _initialize_mock_data(self):
+    def _initialize_document_index(self):
         """
-        Create a simple database with mock coaching data for the prototype
-        In a real implementation, this would load actual coaching documents into a vector index
+        Create a document index using LlamaIndex
+        In the prototype, we'll use mock data. In production, this would use real documents.
         """
         # Ensure the data directory exists
         os.makedirs("src/data/coaching_docs", exist_ok=True)
@@ -61,14 +63,42 @@ class RAGTool:
              }
         ]
 
-        # Write mock documents to files
+        # Write mock documents to files if they don't exist
         for doc in mock_docs:
-            with open(f"src/data/coaching_docs/{doc['filename']}", 'w') as f:
-                f.write(doc['content'])
+            doc_path = f"src/data/coaching_docs/{doc['filename']}"
+            if not os.path.exists(doc_path):
+                with open(doc_path, 'w') as f:
+                    f.write(doc['content'])
 
-        # In a real implementation, we would create a proper vector index here
-        # For the prototype, we'll just read these files when needed
+        # Set up LlamaIndex components
         self.docs_path = "src/data/coaching_docs"
+
+        try:
+            # Load documents
+            documents = SimpleDirectoryReader(self.docs_path).load_data()
+
+            # Create embeddings and index
+            # Use GeminiEmbedding for embedding if API key is available, otherwise use default
+            api_key = os.getenv("GEMINI_API_KEY")
+            if api_key:
+                embed_model = GeminiEmbedding(
+                    model_name="models/embedding-001", api_key=api_key)
+                self.index = VectorStoreIndex.from_documents(
+                    documents,
+                    embed_model=embed_model
+                )
+            else:
+                # Fall back to default embedding if no API key
+                self.index = VectorStoreIndex.from_documents(documents)
+
+            # Create retriever
+            self.retriever = self.index.as_retriever(similarity_top_k=2)
+
+        except Exception as e:
+            print(f"Error initializing document index: {str(e)}")
+            # Create empty index as fallback
+            self.index = None
+            self.retriever = None
 
     def retrieve_data(self, query):
         """
@@ -80,9 +110,29 @@ class RAGTool:
         Returns:
             str: Relevant information from the coaching documents
         """
-        # For the prototype, we do a simple text search in our mock files
-        results = []
+        try:
+            if self.index is None:
+                # Fallback to simple file search if index creation failed
+                return self._simple_file_search(query)
 
+            # Use LlamaIndex retriever
+            nodes = self.retriever.retrieve(query)
+
+            if nodes:
+                results = []
+                for node in nodes:
+                    source = node.metadata.get("file_name", "unknown source")
+                    results.append(f"From {source}:\n{node.text}")
+                return "\n\n".join(results)
+            else:
+                return "No relevant information found in the coaching documents."
+
+        except Exception as e:
+            return f"Error retrieving data: {str(e)}"
+
+    def _simple_file_search(self, query):
+        """Fallback method for simple text search in files"""
+        results = []
         try:
             for filename in os.listdir(self.docs_path):
                 with open(os.path.join(self.docs_path, filename), 'r') as f:
