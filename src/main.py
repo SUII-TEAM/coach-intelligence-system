@@ -3,7 +3,8 @@ import gradio as gr
 from dotenv import load_dotenv
 import logging
 import google.generativeai as genai
-from typing import Dict, Any
+from typing import Dict, Any, List, Tuple
+from llama_index.core.chat_engine import SimpleChatEngine
 
 # Import agents
 from src.agents import (
@@ -42,7 +43,7 @@ def initialize_agents(logger):
     logger.info("Initializing agents...")
 
     try:
-        # Create agent objects (not actual LlamaIndex agents yet)
+        # Create agent objects
         coordinator = CoordinatorAgent()
         logger.info("Coordinator Agent initialized")
 
@@ -76,7 +77,7 @@ def initialize_agents(logger):
 
 
 def create_agent_system(agents, logger):
-    """Create an integrated multi-agent system"""
+    """Create an integrated multi-agent system with chat capabilities"""
     logger.info("Creating agent system...")
 
     try:
@@ -86,69 +87,76 @@ def create_agent_system(agents, logger):
             if name != "coordinator":
                 agent_tools = agent.get_tools()
                 if agent_tools:
-                    # Debug: print tool information
-                    for tool in agent_tools:
-                        logger.info(f"Tool from {name}: {tool}")
-                        try:
-                            logger.info(f"Tool name: {tool.metadata.name}")
-                        except Exception as e:
-                            logger.error(
-                                f"Error accessing tool name: {str(e)}")
-                            logger.error(f"Tool type: {type(tool)}")
-
                     all_tools.extend(agent_tools)
                     logger.info(f"Added tools from {name} agent")
 
         # Create coordinator agent with all tools
         coordinator = agents["coordinator"]
-        multi_agent_system = coordinator.create(all_tools)
+        chat_engine = coordinator.create(all_tools)
 
         logger.info("Agent system created successfully")
-        return multi_agent_system
+        return chat_engine
 
     except Exception as e:
         logger.error(f"Error creating agent system: {str(e)}")
         raise
 
 
-def create_ui(agent_system, logger):
-    """Create the Gradio UI for user interaction"""
+def create_ui(chat_engine: SimpleChatEngine, logger):
+    """Create the Gradio UI for chat interaction"""
     logger.info("Setting up user interface...")
 
-    def process_command(command):
-        """Process user commands through the agent system"""
-        if not command.strip():
-            return "Please enter a command."
+    def process_chat(message: str, history: List[Tuple[str, str]]):
+        """Process chat messages through the agent system"""
+        if not message.strip():
+            return "", history
 
-        logger.info(f"Processing command: {command}")
+        logger.info(f"Processing message: {message}")
 
         try:
-            # Process the command through the coordinator agent
-            response = agent_system.chat(command)
-            logger.info("Command processed successfully")
+            # Process the message through the chat engine
+            response = chat_engine.chat(message)
+            logger.info("Message processed successfully")
 
-            return str(response)
+            # Update history with the new message and response
+            history.append((message, str(response)))
+            return "", history
 
         except Exception as e:
-            error_msg = f"Error processing command: {str(e)}"
+            error_msg = f"Error processing message: {str(e)}"
             logger.error(error_msg)
-            return f"Sorry, an error occurred: {str(e)}"
+            history.append((message, f"Sorry, an error occurred: {str(e)}"))
+            return "", history
 
-    interface = gr.Interface(
-        fn=process_command,
-        inputs=gr.Textbox(
-            lines=2, placeholder="Enter your coaching command..."),
-        outputs="text",
-        title="Coach Intelligence System",
-        description="AI-powered coaching assistant for strategy planning and real-time match analysis",
-        theme="default",
-        examples=[
-            ["Suggest a defensive formation"],
-            ["Show me a 4-3-3 formation"],
-            ["What tactics should I use against a pressing team?"],
-            ["Analyze data for Manchester United's recent matches"]
-        ]
-    )
+    def reset_chat():
+        """Reset the chat history and memory"""
+        logger.info("Resetting chat history and memory")
+        chat_engine.reset()
+        return []
+
+    with gr.Blocks(theme="default") as interface:
+        gr.Markdown("# Coach Intelligence System")
+        gr.Markdown(
+            "AI-powered coaching assistant for strategy planning and real-time match analysis")
+
+        chatbot = gr.Chatbot()
+        msg = gr.Textbox(placeholder="Type your message here...", lines=1)
+        clear = gr.Button("Reset Chat", variant="secondary")
+
+        # Set up examples
+        examples = gr.Examples(
+            examples=[
+                "Suggest a defensive formation",
+                "Show me a 4-3-3 formation",
+                "What tactics should I use against a pressing team?",
+                "Analyze data for Manchester United's recent matches"
+            ],
+            inputs=msg
+        )
+
+        # Set up event handlers
+        msg.submit(process_chat, inputs=[msg, chatbot], outputs=[msg, chatbot])
+        clear.click(reset_chat, outputs=[chatbot])
 
     logger.info("User interface created successfully")
     return interface
@@ -166,8 +174,8 @@ def main():
     try:
         # Initialize the system
         agents = initialize_agents(logger)
-        agent_system = create_agent_system(agents, logger)
-        ui = create_ui(agent_system, logger)
+        chat_engine = create_agent_system(agents, logger)
+        ui = create_ui(chat_engine, logger)
 
         # Launch the UI
         logger.info("Launching user interface")
