@@ -10,7 +10,7 @@ class BaseAgent:
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY")
         self.llm = Gemini(api_key=self.api_key,
-                          model_name="models/gemini-2.0-flash")
+                          model_name="models/gemini-2.5-pro-preview-03-25")
         self.system_prompt = "You are an AI assistant."
         self.tools = []
 

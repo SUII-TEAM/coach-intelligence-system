@@ -1,34 +1,71 @@
-# Coach-Intelligence-System Prototype
+# Coach Intelligence System
 
-A multi-agent AI system designed to empower football coaches with strategic planning, real-time data analysis, and visualization.
+```
+╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║                  COACH INTELLIGENCE SYSTEM                        ║
+║                                                                   ║
+║              AI-powered football coaching assistant               ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝
+```
 
-## Features
+A sophisticated multi-agent AI system designed to empower football (soccer) coaches with strategic planning, real-time data analysis, and tactical visualization.
 
-- **Strategy Planning**: Generate and adjust game strategies based on real-time data
-- **Data Retrieval**: Fetch live match data, coaching documents, and external information
-- **Data Analysis**: Process match events and recommend tactical adjustments
-- **Visualization**: Display strategies and analytics with clear visuals
+## Core Capabilities
+
+- **Strategic Analysis:** Generate formations, tactics, and set-piece strategies based on team strengths and opponent weaknesses
+- **Match Data Processing:** Retrieve and analyze live or historical match statistics to inform in-game decisions
+- **Knowledge Retrieval:** Access relevant coaching documents and external football information through RAG and search tools
+- **Visual Representations:** Display tactics, formations, and match analytics through clear, coach-friendly visualizations
+- **Conversation Memory:** Maintain context across coaching sessions for continuous improvement
+
+## System Architecture
+
+
+### Multi-Agent Framework
+
+The system employs a carefully designed multi-agent architecture:
+
+- **Coordinator Agent:** Central orchestrator handling user requests and delegating specialized tasks
+- **Data Retrieval Agent:** Gathers information from various sources including:
+  - RAG Tool for accessing internal coaching documents
+  - Search Tool for external football knowledge
+  - Match Data Fetcher for real-time statistics
+- **Analysis Agent:** Processes raw data into actionable insights via:
+  - Match Data Analyzer for statistical interpretation
+- **Planning Agent:** Develops strategic recommendations through:
+  - Planning Tool for formations, tactics, and set pieces
+- **Visualization Agent:** Creates visual representations of concepts and data
+
+### Technology Stack
+
+- **LlamaIndex:** Core framework for specialized LLM agents and RAG capabilities
+- **Gemini Pro:** Powers agent reasoning and natural language understanding
+- **LangChain:** Integrated for specific tools (e.g., SerpAPI web search)
+- **Gradio:** Intuitive chat interface for coach interaction
+- **Matplotlib/Plotly:** Data visualization libraries
 
 ## Installation
 
-1. **Clone the repository**:
+1. **Clone the repository:**
 
    ```bash
    git clone https://github.com/yourusername/coach-intelligence-system.git
    cd coach-intelligence-system
    ```
 
-2. **Install dependencies**:
+2. **Install dependencies:**
 
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Environment Setup**:
-   Create a `.env` file in the root directory with the following variables:
+3. **Configure API keys:**
+   Create a `.env` file in the root directory with:
    ```
    GEMINI_API_KEY=your_gemini_api_key
-   SERPAPI_API_KEY=your_serpapi_key
+   SERPAPI_API_KEY=your_serpapi_key  # Optional: Enables web search capabilities
    ```
 
 ## Usage
@@ -39,68 +76,69 @@ Run the application using:
 python run.py
 ```
 
-This will launch a Gradio interface where you can enter coaching commands like:
+This launches a Gradio interface where you can interact with the system using natural language. Here are example queries:
 
-- "Suggest a defensive formation"
-- "Analyze Manchester United's last match"
-- "Show me a 4-3-3 formation"
-- "What tactics should I use against a team that presses high?"
+### Formation & Tactics
 
-## Development Priority
+- "What's the best formation to counter a high-pressing team?"
+- "Create a defensive strategy for protecting a 1-0 lead"
+- "Show me a 4-3-3 formation with attacking fullbacks"
+- "Suggest tactical changes to increase midfield control"
+- "Design a set piece routine for corners against zonal marking"
 
-Below is the prioritized order for developing the features of the Coach-Intelligence-System, ensuring a logical sequence based on dependencies and system requirements:
+### Analysis
 
-| **Order** | **Feature**          | **Description**                                       | **Dependencies**               |
-| --------- | -------------------- | ----------------------------------------------------- | ------------------------------ |
-| 1         | Coordinator Agent    | Central hub for user interaction and task delegation. | None                           |
-| 2         | Data Retrieval Agent | Gathers data from various sources.                    | Coordinator Agent              |
-| 3         | RAG Tool             | Retrieves internal coaching data.                     | Data Retrieval Agent           |
-| 4         | Search Tool          | Collects external data.                               | Data Retrieval Agent           |
-| 5         | Match Data Fetcher   | Retrieves real-time match data from api-football.     | Data Retrieval Agent           |
-| 6         | Analysis Agent       | Interprets data for actionable insights.              | Data Retrieval Agent           |
-| 7         | Match Data Analyzer  | Processes real-time match data for insights.          | Analysis Agent                 |
-| 8         | Planning Agent       | Designs and refines game strategies.                  | Coordinator Agent              |
-| 9         | Planning Tool        | Generates strategic recommendations.                  | Planning Agent                 |
-| 10        | Visualization Agent  | Renders data and strategies visually.                 | Planning Agent, Analysis Agent |
-| 11        | Visualization        | Presents strategies and analytics visually.           | Visualization Agent            |
+- "Analyze Manchester United's possession statistics from their last match"
+- "What are Arsenal's defensive weaknesses based on recent games?"
+- "Compare the pressing effectiveness of Liverpool and Manchester City"
+- "Show shot map and xG data from Chelsea's last match"
+- "Identify patterns in how Bayern Munich transitions from defense to attack"
 
-## System Architecture
+### Training
 
-### Agents
+- "Generate a training session focusing on defensive transitions"
+- "What drills should I use to improve our pressing game?"
+- "Create a warm-up routine for match day"
 
-- **Coordinator Agent**: Manages user interaction and orchestrates other agents
-- **Data Retrieval Agent**: Gathers data from various sources
-- **Analysis Agent**: Interprets data for actionable insights
-- **Planning Agent**: Designs and refines game strategies
-- **Visualization Agent**: Renders data and strategies visually
+## Project Structure
 
-### Technology Stack
+- **`src/`**: Core codebase
+  - **`agents/`**: Multi-agent system implementation
+  - **`tools/`**: Specialized capabilities (RAG, search, match data, planning, etc.)
+  - **`visualization/`**: Generation of tactical diagrams and data plots
+  - **`data/`**: Internal knowledge base and coaching documents
+  - **`main.py`**: Application entry point
+- **`conversations/`**: Storage for past coaching sessions
+- **`logs/`**: System activity logs for debugging
+- **`frontend-app/`**: Additional web interface components
+- **`tests/`**: Testing suite
 
-The system is built using:
+## Development Workflow
 
-- **LlamaIndex**: Core framework for creating and managing specialized AI agents
-- **Gemini Pro**: LLM powering agent reasoning and natural language understanding
-- **LangChain**: Integrated for specific tools like web search via SerpAPI
-- **Gradio**: User interface for interacting with the system
-- **Matplotlib/Plotly**: Data visualization libraries
+The current system has implemented the following components (checked items):
 
-### Tools
+- [x] Coordinator Agent
+- [x] Data Retrieval Agent
+- [x] RAG Tool for coaching documents
+- [x] Search Tool for external information
+- [x] Match Data Fetcher (with mock data)
+- [x] Analysis Agent
+- [x] Match Data Analyzer
+- [x] Planning Agent
+- [x] Planning Tool (formations, tactics, set pieces)
+- [x] Visualization Agent
+- [x] Visualization Tool (formations, tactics)
+- [x] Conversation management system
 
-- **RAG Tool**: Retrieves internal coaching data using LlamaIndex's document index capabilities
-- **Search Tool**: Collects external data using LangChain's SerpAPI integration
-- **Match Data Fetcher**: Retrieves real-time match data
-- **Match Data Analyzer**: Processes match data into insights
-- **Planning Tool**: Generates strategic recommendations
-- **Visualization Tool**: Creates visual representations
+## Contributing
 
-## Example Workflow
+Contributions that enhance the system's capabilities are welcome. Please follow these steps:
 
-1. User enters a command: "Suggest a formation for a defensive approach"
-2. Coordinator Agent understands the request and delegates tasks
-3. Data Retrieval Agent gathers relevant information about defensive formations
-4. Planning Agent generates a formation recommendation (e.g., 5-3-2)
-5. Visualization Agent creates a visual diagram of the formation
-6. Coordinator Agent compiles all information and presents it to the user
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
